@@ -1,0 +1,4 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = C:\Users\VIRUPA~1\AppData\Local\Temp\dvc
