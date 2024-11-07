@@ -18,9 +18,6 @@ dagshub.init(repo_owner='Virupakshavegi', repo_name='MLOP-s-Water_quality_predic
 mlflow.set_experiment("DVCPipeline")
 mlflow.set_tracking_uri("https://dagshub.com/Virupakshavegi/MLOP-s-Water_quality_prediction_project.mlflow")
 
-
-#mlflow.set_experiment("water-potability-prediction")
-
 def load_data(filepath: str) -> pd.DataFrame:
     try:
         return pd.read_csv(filepath)
@@ -51,7 +48,7 @@ def evaluation_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name:
         
         y_pred = model.predict(X_test)
 
-        # Calculate metrics
+        
         acc = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred)
         recall = recall_score(y_test, y_pred)
@@ -60,13 +57,13 @@ def evaluation_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name:
         mlflow.log_param("Test_size",test_size)
         mlflow.log_param("n_estimators",n_estimators) 
 
-        # Log metrics
+       
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("precision", precision)
         mlflow.log_metric("recall", recall)
         mlflow.log_metric("f1_score", f1)
         
-        # Confusion matrix
+       
         cm = confusion_matrix(y_test, y_pred)
         plt.figure(figsize=(5, 5))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
@@ -76,11 +73,9 @@ def evaluation_model(model, X_test: pd.DataFrame, y_test: pd.Series, model_name:
         cm_path = f"confusion_matrix_{model_name.replace(' ', '_')}.png"
         plt.savefig(cm_path)
         
-        # Log confusion matrix artifact
+        
         mlflow.log_artifact(cm_path)
         
-        # Log the model
-        #mlflow.sklearn.log_model(model, model_name.replace(' ', '_'))
 
         metrics_dict = {
             'accuracy': acc,
@@ -110,23 +105,22 @@ def main():
         X_test, y_test = prepare_data(test_data)
         model = load_model(model_path)
 
-        # Start MLflow run
         with mlflow.start_run() as run:
             metrics = evaluation_model(model, X_test, y_test, model_name)
             save_metrics(metrics, metrics_path)
 
-            # Log artifacts
+   
             mlflow.log_artifact(model_path)
             mlflow.log_artifact(metrics_path)
             
-            # Log the source code file
+     
             mlflow.log_artifact(__file__)
 
             signature = infer_signature(X_test,model.predict(X_test))
 
             mlflow.sklearn.log_model(model,"Best Model",signature=signature)
 
-            #Save run ID and model info to JSON File
+           
             run_info = {'run_id': run.info.run_id, 'model_name': "Best Model"}
             reports_path = "reports/run_info.json"
             with open(reports_path, 'w') as file:
